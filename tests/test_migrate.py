@@ -22,8 +22,10 @@ def test_migrate_aborts_without_confirmation(tmp_path, capsys):
     palace_dir.mkdir()
     (palace_dir / "chroma.sqlite3").write_text("db")
 
-    mock_chromadb = SimpleNamespace(__version__="0.6.0", PersistentClient=MagicMock())
-    mock_chromadb.PersistentClient.side_effect = Exception("unreadable")
+    mock_chromadb = SimpleNamespace(
+        __version__="0.6.0",
+        PersistentClient=MagicMock(side_effect=Exception("unreadable")),
+    )
 
     with (
         patch.dict("sys.modules", {"chromadb": mock_chromadb}),

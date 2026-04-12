@@ -67,13 +67,21 @@ def sanitize_query(raw_query: str) -> dict:
     raw_query = raw_query.strip()
     original_length = len(raw_query)
 
+    def _strip_wrapping_quotes(candidate: str) -> str:
+        candidate = candidate.strip()
+        while candidate[:1] in {"'", '"'} or candidate[-1:] in {"'", '"'}:
+            candidate = candidate.strip("\"'")
+            if not candidate:
+                return ""
+        return candidate
+
     def _trim_candidate(candidate: str) -> str:
-        candidate = candidate.strip().strip("\"'")
+        candidate = _strip_wrapping_quotes(candidate)
         if len(candidate) <= MAX_QUERY_LENGTH:
             return candidate
 
         nested_fragments = [
-            frag.strip().strip("\"'") for frag in _SENTENCE_SPLIT.split(candidate) if frag.strip()
+            _strip_wrapping_quotes(frag) for frag in _SENTENCE_SPLIT.split(candidate) if frag.strip()
         ]
         for frag in reversed(nested_fragments):
             if MIN_QUERY_LENGTH <= len(frag) <= MAX_QUERY_LENGTH:
